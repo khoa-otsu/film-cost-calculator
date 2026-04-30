@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Film Production Cost Calculator</title>
+  <style>
+    :root {
+      --bg:           #f2f2f7;
+      --surface:      #ffffff;
+      --surface-alt:  #f8f8f8;
+      --border:       #e4e4e7;
+      --text:         #18181b;
+      --text-muted:   #71717a;
+      --accent:       #6366f1;
+      --accent-dim:   #eef2ff;
+      --success:      #16a34a;
+      --success-dim:  #dcfce7;
+      --warning:      #b45309;
+      --warning-dim:  #fef3c7;
+      --danger:       #dc2626;
+      --shadow:       0 1px 4px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04);
+      --radius:       10px;
+      --dreamina:     #7c3aed;
+      --higgsfield:   #0ea5e9;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:           #09090b;
+        --surface:      #18181b;
+        --surface-alt:  #27272a;
+        --border:       #3f3f46;
+        --text:         #fafafa;
+        --text-muted:   #a1a1aa;
+        --accent:       #818cf8;
+        --accent-dim:   #1e1b4b;
+        --success:      #4ade80;
+        --success-dim:  #14532d;
+        --warning:      #fbbf24;
+        --warning-dim:  #451a03;
+        --danger:       #f87171;
+        --shadow:       0 1px 4px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
+      }
+    }
+
+    [data-theme="dark"] {
+      --bg:           #09090b;
+      --surface:      #18181b;
+      --surface-alt:  #27272a;
+      --border:       #3f3f46;
+      --text:         #fafafa;
+      --text-muted:   #a1a1aa;
+      --accent:       #818cf8;
+      --accent-dim:   #1e1b4b;
+      --success:      #4ade80;
+      --success-dim:  #14532d;
+      --warning:      #fbbf24;
+      --warning-dim:  #451a03;
+      --danger:       #f87171;
+      --shadow:       0 1px 4px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
+    }
+
+    [data-theme="light"] {
+      --bg:           #f2f2f7;
+      --surface:      #ffffff;
+      --surface-alt:  #f8f8f8;
+      --border:       #e4e4e7;
+      --text:         #18181b;
+      --text-muted:   #71717a;
+      --accent:       #6366f1;
+      --accent-dim:   #eef2ff;
+      --success:      #16a34a;
+      --success-dim:  #dcfce7;
+      --warning:      #b45309;
+      --warning-dim:  #fef3c7;
+      --danger:       #dc2626;
+      --shadow:       0 1px 4px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 28px 16px 48px;
+      transition: background .2s, color .2s;
+      line-height: 1.5;
+    }
+
+    .container { max-width: 980px; margin: 0 auto; }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 28px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .header-text h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: -.025em;
+    }
+
+    .header-text p {
+      font-size: .83rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .theme-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 7px 13px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: .8rem;
+      white-space: nowrap;
+      transition: color .15s, background .15s;
+    }
+    .theme-btn:hover { color: var(--text); background: var(--surface-alt); }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+    }
+
+    .section-label {
+      font-size: .7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    /* ── Global Inputs ── */
+    .global-inputs { margin-bottom: 20px; }
+
+    .input-row { display: flex; gap: 14px; flex-wrap: wrap; }
+
+    .input-group { flex: 1; min-width: 160px; }
+
+    label {
+      display: block;
+      font-size: .78rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+    }
+
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 8px 11px;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: .92rem;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+      -moz-appearance: textfield;
+    }
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+    input[type="number"]:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent);
+    }
+    input::placeholder { color: var(--text-muted); opacity: .6; }
+
+    .input-prefix-wrap { position: relative; }
+    .input-prefix-wrap .pfx {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: .88rem;
+      pointer-events: none;
+      user-select: none;
+    }
+    .input-prefix-wrap input { padding-left: 20px; }
+
+    /* ── Platform Grid ── */
+    .platform-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 620px) {
+      .platform-grid { grid-template-columns: 1fr; }
+    }
+
+    .platform-card { display: flex; flex-direction: column; gap: 16px; }
+
+    .platform-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .platform-dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .platform-header h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: -.01em;
+    }
+
+    .platform-inputs { display: flex; flex-direction: column; gap: 11px; }
+
+    .input-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    /* ── Results Table ── */
+    .results-box {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      overflow: hidden;
+    }
+
+    .results-head {
+      font-size: .68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .09em;
+      color: var(--text-muted);
+      padding: 9px 13px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 9px 13px;
+      border-bottom: 1px solid var(--border);
+      gap: 8px;
+    }
+    .result-row:last-child { border-bottom: none; }
+
+    .rlabel {
+      font-size: .82rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .rval {
+      font-size: .88rem;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
+
+    .rval.big { font-size: 1rem; color: var(--accent); }
+    .rval.warn { color: var(--warning); }
+    .rval.muted { color: var(--text-muted); font-weight: 400; font-style: italic; }
+
+    /* ── Comparison ── */
+    .comparison { }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+    }
+
+    .cmp-stat {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 13px 15px;
+    }
+
+    .cmp-stat-label {
+      font-size: .73rem;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+
+    .cmp-stat-value {
+      font-size: 1.15rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -.01em;
+    }
+
+    .cmp-stat-value.winner { color: var(--success); }
+    .cmp-stat-value.saving { color: var(--accent); }
+
+    .cmp-stat-sub {
+      font-size: .72rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .cmp-equal {
+      color: var(--text-muted);
+      font-size: .88rem;
+      padding: 8px 0;
+    }
+
+    .cmp-placeholder {
+      color: var(--text-muted);
+      font-size: .85rem;
+      font-style: italic;
+      padding: 6px 0;
+    }
+
+    /* winner highlight border */
+    .platform-card.is-winner .platform-header { position: relative; }
+    .winner-badge {
+      margin-left: auto;
+      background: var(--success-dim);
+      color: var(--success);
+      font-size: .68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      padding: 3px 8px;
+      border-radius: 100px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="header-text">
+      <h1>AI Film Production Cost Calculator</h1>
+      <p>Compare subscription costs across AI video platforms</p>
+    </div>
+    <button class="theme-btn" onclick="toggleTheme()">☀︎ / ☾ Theme</button>
+  </header>
+
+  <!-- Global project settings -->
+  <div class="card global-inputs">
+    <div class="section-label">Project Settings</div>
+    <div class="input-row">
+      <div class="input-group">
+        <label for="g-minutes">Target Film Length</label>
+        <div class="input-prefix-wrap">
+          <input type="number" id="g-minutes" value="10" min="0.1" step="0.1" placeholder="minutes">
+          <span class="pfx" style="left:auto;right:10px;transform:translateY(-50%)">min</span>
+        </div>
+      </div>
+      <div class="input-group">
+        <label for="g-months">Production Duration</label>
+        <div class="input-prefix-wrap">
+          <input type="number" id="g-months" value="3" min="1" step="1" placeholder="months">
+          <span class="pfx" style="left:auto;right:10px;transform:translateY(-50%)">mo</span>
+        </div>
+      </div>
+      <div class="input-group">
+        <label for="g-mandays">Mandays <span style="font-weight:400;opacity:.6">(= film minutes)</span></label>
+        <div class="input-prefix-wrap">
+          <input type="number" id="g-mandays" readonly tabindex="-1"
+            style="background:var(--bg);color:var(--text-muted);cursor:default">
+          <span class="pfx" style="left:auto;right:10px;transform:translateY(-50%)">md</span>
+        </div>
+      </div>
+      <div class="input-group">
+        <label for="g-manday-cost">Cost per Manday</label>
+        <div class="input-prefix-wrap">
+          <span class="pfx">$</span>
+          <input type="number" id="g-manday-cost" value="" min="0" step="0.01" placeholder="e.g. 200">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Platform columns -->
+  <div class="platform-grid">
+
+    <!-- Dreamina -->
+    <div class="card platform-card" id="card-dreamina">
+      <div class="platform-header">
+        <div class="platform-dot" style="background:var(--dreamina)"></div>
+        <h2>Dreamina</h2>
+        <span class="winner-badge" id="badge-dreamina" style="display:none">Cheaper</span>
+      </div>
+
+      <div class="platform-inputs">
+        <div class="input-pair">
+          <div class="input-group">
+            <label>Subscription Price</label>
+            <div class="input-prefix-wrap">
+              <span class="pfx">$</span>
+              <input type="number" id="d-price" value="300" min="0" step="0.01">
+            </div>
+          </div>
+          <div class="input-group">
+            <label>Billing Cycle</label>
+            <select id="d-cycle">
+              <option value="yearly" selected>Yearly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          </div>
+        </div>
+        <div class="input-group">
+          <label>Credits / Month (per account)</label>
+          <input type="number" id="d-credits-mo" value="21000" min="1" step="1">
+        </div>
+        <div class="input-group">
+          <label>Credits / Minute of Film</label>
+          <input type="number" id="d-credits-min" value="21000" min="1" step="1">
+        </div>
+      </div>
+
+      <div class="results-box">
+        <div class="results-head">Calculated Costs</div>
+        <div class="result-row">
+          <span class="rlabel">Accounts Needed</span>
+          <span class="rval big" id="d-out-accounts">—</span>
+        </div>
+        <div class="result-row">
+          <span class="rlabel">Platform Cost</span>
+          <span class="rval" id="d-out-cost">—</span>
+        </div>
+        <div class="result-row">
+          <span class="rlabel">Mandays</span>
+          <span class="rval" id="d-out-mandays">—</span>
+        </div>
+        <div class="result-row">
+          <span class="rlabel">Labor Cost</span>
+          <span class="rval" id="d-out-labor">—</span>
+        </div>
+        <div class="result-row" style="background:color-mix(in srgb,var(--accent-dim) 60%,transparent)">
+          <span class="rlabel" style="font-weight:600;color:var(--text)">Total Cost</span>
+          <span class="rval big" id="d-out-grand">—</span>
+        </div>
+        <div class="result-row">
+          <span class="rlabel">Credits Wasted</span>
+          <span class="rval warn" id="d-out-wasted">—</span>
+        </div>
+        <div class="result-row">
+          <span class="rlabel">Effective Cost / Minute</span>
+          <span class="rval" id="d-out-cpm">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Higgsfield -->
+    <div class="card platform-card" id="card-higgsfield">
+      <div class="platform-header">
+        <div class="platform-dot" style="background:var(--higgsfield)"></div>
+        <h2>Higgsfield</h2>
+        <span class="winner-badge" id="badge-higgsfield" style="display:none">Cheaper</span>
+      </div>
+
+      <div class="platform-inputs">
+        <div class="input-pair">
+          <div class="input-group">
+            <label>Subscription Price</label>
+            <div class="input-prefix-wrap">
+              <span class="pfx">$</span>
+              <input type="number" id="h-price" value="" min="0" step="0.01" placeholder="e.g. 49">
+            </div>
+          </div>
+          <div class="input-group">
+            <label>Billing Cycle</label>
+            <select id="h-cycle">
+              <option value="monthly" selected>Monthly</option>
+              <option value="yearly">Yearly</option>
+            </select>
+          </div>
+        </div>
+        <div class="input-group">
+          <label>Credits / Month (per account)</label>
+          <input type="number" id="h-credits-mo" value="" min="1" step="1" placeholder="e.g. 2000">
+        </div>
+        <div class="input-group">
+          <label>Credits / Minute of Film</label>
+          <input type="number" id="h-credits-min" value="" min="1" step="1" placeholder="e.g. 500">
+        </div>
+      </div>
+
+      <div class="results-box">
+        <div class="results-head">Calculated Costs</div>
+        <div class="result-row">
+          <span class="rlabel">Accounts Needed</span>
+          <span class="rval big" id="h-out-accounts">—</span>
+        </div>
+        <div class="result-row">
+          <span class="rlabel">Platform Cost</span>
+          <span class="rval" id="h-out-cost">—</span>
+        </div>
+        <div class="result-row">
+          <span class="rlabel">Mandays</span>
+          <span class="rval" id="h-out-mandays">—</span>
+        </div>
+        <div class="result-row">
+          <span class="rlabel">Labor Cost</span>
+          <span class="rval" id="h-out-labor">—</span>
+        </div>
+        <div class="result-row" style="background:color-mix(in srgb,var(--accent-dim) 60%,transparent)">
+          <span class="rlabel" style="font-weight:600;color:var(--text)">Total Cost</span>
+          <span class="rval big" id="h-out-grand">—</span>
+        </div>
+        <div class="result-row">
+          <span class="rlabel">Credits Wasted</span>
+          <span class="rval warn" id="h-out-wasted">—</span>
+        </div>
+        <div class="result-row">
+          <span class="rlabel">Effective Cost / Minute</span>
+          <span class="rval" id="h-out-cpm">—</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Comparison row -->
+  <div class="card comparison">
+    <div class="section-label">Comparison</div>
+    <div id="cmp-inner">
+      <p class="cmp-placeholder">Fill in both platforms above to see a comparison.</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  /* ── Theme toggle ── */
+  function toggleTheme() {
+    const html = document.documentElement;
+    const cur = html.getAttribute('data-theme');
+    const sysDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (!cur) {
+      html.setAttribute('data-theme', sysDark ? 'light' : 'dark');
+    } else {
+      html.setAttribute('data-theme', cur === 'dark' ? 'light' : 'dark');
+    }
+  }
+
+  /* ── Core calculation ── */
+  function calc(price, cycle, creditsPerMo, creditsPerMin, targetMin, durationMo) {
+    if ([price, creditsPerMo, creditsPerMin, targetMin, durationMo].some(v => !v || v <= 0)) return null;
+
+    const totalCreditsNeeded    = creditsPerMin * targetMin;
+    const creditsPerAccountTotal = creditsPerMo * durationMo;
+    const accountsNeeded        = Math.ceil(totalCreditsNeeded / creditsPerAccountTotal);
+
+    let totalCost;
+    if (cycle === 'monthly') {
+      totalCost = accountsNeeded * price * durationMo;
+    } else {
+      // Yearly billing: must commit to full years
+      const yearsNeeded = Math.ceil(durationMo / 12);
+      totalCost = accountsNeeded * price * yearsNeeded;
+    }
+
+    const totalCreditsAvail = accountsNeeded * creditsPerMo * durationMo;
+    const creditsWasted     = totalCreditsAvail - totalCreditsNeeded;
+    const wastedPct         = totalCreditsAvail > 0 ? (creditsWasted / totalCreditsAvail) * 100 : 0;
+    const costPerMin        = totalCost / targetMin;
+
+    return { accountsNeeded, totalCost, creditsWasted, wastedPct, costPerMin };
+  }
+
+  /* ── Formatters ── */
+  const usd = n => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const num = n => n.toLocaleString('en-US');
+
+  /* ── Render helpers ── */
+  function setResult(id, text, cls) {
+    const el = document.getElementById(id);
+    el.textContent = text;
+    el.className = 'rval' + (cls ? ' ' + cls : '');
+  }
+
+  function clearPlatform(prefix) {
+    ['accounts','cost','mandays','labor','grand','wasted','cpm'].forEach(k =>
+      setResult(prefix + '-out-' + k, '—', 'muted')
+    );
+  }
+
+  function renderPlatform(prefix, r, laborCost) {
+    if (!r) { clearPlatform(prefix); return; }
+    const grandTotal = r.totalCost + laborCost;
+    const grandCPM   = grandTotal / r.targetMin;
+    setResult(prefix + '-out-accounts', num(r.accountsNeeded), 'big');
+    setResult(prefix + '-out-cost',     usd(r.totalCost),      '');
+    setResult(prefix + '-out-mandays',  num(r.targetMin) + ' md', '');
+    setResult(prefix + '-out-labor',    laborCost > 0 ? usd(laborCost) : '—', laborCost > 0 ? '' : 'muted');
+    setResult(prefix + '-out-grand',    usd(grandTotal),        'big');
+    setResult(prefix + '-out-wasted',   `${num(r.creditsWasted)} (${r.wastedPct.toFixed(1)}%)`, 'warn');
+    setResult(prefix + '-out-cpm',      usd(grandCPM) + ' / min', '');
+    return grandTotal;
+  }
+
+  /* ── Main update ── */
+  function update() {
+    const targetMin    = parseFloat(document.getElementById('g-minutes').value);
+    const durationMo   = parseFloat(document.getElementById('g-months').value);
+    const mandayCost   = parseFloat(document.getElementById('g-manday-cost').value) || 0;
+    const laborCost    = (targetMin > 0 ? targetMin : 0) * mandayCost;
+
+    // Sync derived mandays display
+    document.getElementById('g-mandays').value = (targetMin > 0 && !isNaN(targetMin)) ? targetMin : '';
+
+    const dR = calc(
+      parseFloat(document.getElementById('d-price').value),
+      document.getElementById('d-cycle').value,
+      parseFloat(document.getElementById('d-credits-mo').value),
+      parseFloat(document.getElementById('d-credits-min').value),
+      targetMin, durationMo
+    );
+    if (dR) dR.targetMin = targetMin;
+
+    const hR = calc(
+      parseFloat(document.getElementById('h-price').value),
+      document.getElementById('h-cycle').value,
+      parseFloat(document.getElementById('h-credits-mo').value),
+      parseFloat(document.getElementById('h-credits-min').value),
+      targetMin, durationMo
+    );
+    if (hR) hR.targetMin = targetMin;
+
+    const dGrand = renderPlatform('d', dR, laborCost);
+    const hGrand = renderPlatform('h', hR, laborCost);
+
+    // Badges
+    document.getElementById('badge-dreamina').style.display   = 'none';
+    document.getElementById('badge-higgsfield').style.display = 'none';
+
+    // Comparison
+    const cmpEl = document.getElementById('cmp-inner');
+
+    if (!dR || !hR) {
+      cmpEl.innerHTML = '<p class="cmp-placeholder">Fill in both platforms above to see a comparison.</p>';
+      return;
+    }
+
+    const diff     = dGrand - hGrand;   // positive → Higgsfield cheaper
+    const diffAbs  = Math.abs(diff);
+    const pctSaved = (diffAbs / Math.max(dGrand, hGrand)) * 100;
+    const diffCPM  = Math.abs((dGrand - hGrand) / targetMin);
+
+    let winner, loser;
+    if (diff > 0)       { winner = 'Higgsfield'; loser = 'Dreamina'; }
+    else if (diff < 0)  { winner = 'Dreamina';   loser = 'Higgsfield'; }
+    else                { winner = null; }
+
+    if (winner) {
+      const badgeId = winner === 'Dreamina' ? 'badge-dreamina' : 'badge-higgsfield';
+      document.getElementById(badgeId).style.display = 'inline-block';
+
+      cmpEl.innerHTML = `
+        <div class="comparison-grid">
+          <div class="cmp-stat">
+            <div class="cmp-stat-label">Cheaper Platform</div>
+            <div class="cmp-stat-value winner">${winner}</div>
+            <div class="cmp-stat-sub">vs ${loser}</div>
+          </div>
+          <div class="cmp-stat">
+            <div class="cmp-stat-label">Total Savings</div>
+            <div class="cmp-stat-value saving">${usd(diffAbs)}</div>
+            <div class="cmp-stat-sub">over ${durationMo} month${durationMo !== 1 ? 's' : ''}</div>
+          </div>
+          <div class="cmp-stat">
+            <div class="cmp-stat-label">Savings per Minute</div>
+            <div class="cmp-stat-value saving">${usd(diffCPM)}<span style="font-size:.75rem;font-weight:500">/min</span></div>
+            <div class="cmp-stat-sub">on ${targetMin} min film</div>
+          </div>
+          <div class="cmp-stat">
+            <div class="cmp-stat-label">Cost Reduction</div>
+            <div class="cmp-stat-value saving">${pctSaved.toFixed(1)}%</div>
+            <div class="cmp-stat-sub">${winner} is cheaper</div>
+          </div>
+        </div>
+      `;
+    } else {
+      cmpEl.innerHTML = `<p class="cmp-equal">Both platforms cost the same: <strong>${usd(dGrand)}</strong></p>`;
+    }
+  }
+
+  /* ── Wire inputs ── */
+  document.querySelectorAll('input, select').forEach(el => {
+    el.addEventListener('input', update);
+  });
+
+  update();
+</script>
+</body>
+</html>
